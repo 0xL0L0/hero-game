@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BallMaterialCollection.h"
 #include "LevelManager.h"
 #include "Engine/GameInstance.h"
 #include "HeroGameInstance.generated.h"
@@ -19,4 +20,5 @@ public:
 	virtual void Init() override;
 	UPROPERTY() ULevelManager* LevelManager;
 	UPROPERTY(EditAnywhere) ULevelDataCollectionAsset* LevelDataCollection;
+	UPROPERTY(EditAnywhere) UBallMaterialCollection* BallMaterialCollection;
 };

@@ -19,8 +19,11 @@ class HEROGAME_API AGamePlayerController : public APlayerController
 	
 	virtual void SetupInputComponent() override;
 
-	void HandleRollInput(const FInputActionValue& Value);
-
+	void ProcessRollInput(const FInputActionValue& Value);
+	void ProcessJumpInput(const FInputActionValue& Value);
+	void ProcessDashInput(const FInputActionValue& Value);
+	void ProcessDebugMaterialSwitchInput(const FInputActionValue& Value);
+	
 	UPROPERTY()
 	APlayerBallPawn* PossessedPawn;
 
@@ -33,4 +36,13 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* RollAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* JumpAction;
+    	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* DebugMaterialSwitchAction;
 };

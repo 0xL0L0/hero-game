@@ -25,12 +25,30 @@ void AGamePlayerController::SetupInputComponent()
 		subsystem->AddMappingContext(HeroInputContext,0);
 	}
 	
-	enhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &AGamePlayerController::HandleRollInput);
+	enhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessRollInput);
+	enhancedInput->BindAction(DebugMaterialSwitchAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessDebugMaterialSwitchInput);
 }
 
-void AGamePlayerController::HandleRollInput(const FInputActionValue& Value)
+void AGamePlayerController::ProcessRollInput(const FInputActionValue& Value)
 {
 	const FVector2d rollVector = Value.Get<FVector2d>();
 
 	PossessedPawn->Roll(rollVector);
+}
+
+void AGamePlayerController::ProcessJumpInput(const FInputActionValue& Value)
+{
+}
+
+void AGamePlayerController::ProcessDashInput(const FInputActionValue& Value)
+{
+}
+
+void AGamePlayerController::ProcessDebugMaterialSwitchInput(const FInputActionValue& Value)
+{
+	const float axis = Value.Get<float>();
+	const int axisInt = static_cast<int>(axis);
+	LogUtil::Log(FString::Printf(TEXT("X: %f, Y: %i"), axis, axisInt));
+	const EBallMaterialType materialType = static_cast<EBallMaterialType>(axisInt);
+	PossessedPawn->SwitchMaterial(materialType);
 }
