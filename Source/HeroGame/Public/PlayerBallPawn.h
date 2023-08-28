@@ -7,6 +7,7 @@
 #include "GameEnums.h"
 #include "HeroGameInstance.h"
 #include "HeroGameMode.h"
+#include "Camera/CameraComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "PlayerBallPawn.generated.h"
@@ -32,14 +33,23 @@ class HEROGAME_API APlayerBallPawn : public APawn
 	
 	UPROPERTY()
 	USpringArmComponent* CameraSpringArmComponent;
+
+	UPROPERTY()
+	UCameraComponent* CameraComponent;
+	
+	void CameraFollowBall();
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
+
+	UPROPERTY(EditAnywhere, Category="Balancing")
+	float CameraRotationSpeed;
 	
 	virtual void Tick(float DeltaTime) override;
 	void Roll(const FVector2d& inputAxis);
+	void RotateCamera(const float axis);
 	void SwitchMaterial(const EBallMaterialType& materialType);
 };

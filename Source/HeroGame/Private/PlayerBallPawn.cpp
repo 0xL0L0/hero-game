@@ -22,6 +22,7 @@ void APlayerBallPawn::BeginPlay()
 	GameMode = Cast<AHeroGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	BallComponent = Cast<UStaticMeshComponent>(GetDefaultSubobjectByName("PlayerBall"));
 	CameraSpringArmComponent = Cast<USpringArmComponent>(GetDefaultSubobjectByName("CameraSpringArm"));
+	CameraComponent = Cast<UCameraComponent>(GetDefaultSubobjectByName("Camera"));
 	
 	if(CurrentBallMaterial == nullptr)
 		SwitchMaterial(EBallMaterialType::Wood);
@@ -33,24 +34,33 @@ void APlayerBallPawn::BeginPlay()
 void APlayerBallPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	CameraFollowBall();
+}
+
+void APlayerBallPawn::CameraFollowBall()
+{
+	CameraSpringArmComponent->SetWorldLocation(BallComponent->GetComponentTransform().GetLocation());
+}
+
+void APlayerBallPawn::RotateCamera(const float axis)
+{
+	float rotation = CameraRotationSpeed * axis;
+	FRotator rotator = FRotator(0,rotation,0);
+	CameraSpringArmComponent->AddWorldRotation(rotator);
 }
 
 void APlayerBallPawn::Roll(const FVector2d& inputAxis)
 {
 	const auto normalizedInput = inputAxis.GetSafeNormal();
-	const auto cameraForwardVec = CameraSpringArmComponent->GetForwardVector();
-	const auto cameraRightVec = CameraSpringArmComponent->GetRightVector();
+	const auto cameraForward = CameraComponent->GetForwardVector();
+	const auto cameraRight = CameraComponent->GetRightVector();
+	const auto cameraForwardNorm = FVector(cameraForward.X, cameraForward.Y, 0).GetSafeNormal();
+	const auto cameraRightNorm = FVector(cameraRight.X, cameraRight.Y, 0).GetSafeNormal();
+
+	FVector torque = (cameraForwardNorm * normalizedInput.Y) + (cameraRightNorm * normalizedInput.X);
+	torque.Normalize();
 	
-	// Calculate torque based on camera rotation
-	//const FVector Torque = FVector(CameraForwardVec.X * TargetRoll * -1,CameraForwardVec.Y * TargetRoll * -1,0.0);
-	const FVector torque = FVector(normalizedInput.X * GetWorld()->DeltaTimeSeconds * 100000000000,
-		normalizedInput.Y* GetWorld()->DeltaTimeSeconds * 100000000000,
-		0);
-	
-	auto debugString =  FString::Printf(TEXT("X: %f, Y: %f"), torque.X, torque.Y);
-	LogUtil::Log(debugString);
-	
-	BallComponent->AddTorqueInRadians(torque);
+	BallComponent->AddTorqueInRadians(torque * 1000000);
 }
 
 void APlayerBallPawn::SwitchMaterial(const EBallMaterialType& materialType)

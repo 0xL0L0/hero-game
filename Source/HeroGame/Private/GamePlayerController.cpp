@@ -24,8 +24,9 @@ void AGamePlayerController::SetupInputComponent()
 	{
 		subsystem->AddMappingContext(HeroInputContext,0);
 	}
-	
+
 	enhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessRollInput);
+	enhancedInput->BindAction(CameraRotateAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessCameraRotateInput);
 	enhancedInput->BindAction(DebugMaterialSwitchAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessDebugMaterialSwitchInput);
 }
 
@@ -42,6 +43,12 @@ void AGamePlayerController::ProcessJumpInput(const FInputActionValue& Value)
 
 void AGamePlayerController::ProcessDashInput(const FInputActionValue& Value)
 {
+}
+
+void AGamePlayerController::ProcessCameraRotateInput(const FInputActionValue& Value)
+{
+	const float axis = Value.Get<float>();
+	PossessedPawn->RotateCamera(axis);
 }
 
 void AGamePlayerController::ProcessDebugMaterialSwitchInput(const FInputActionValue& Value)

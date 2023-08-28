@@ -22,6 +22,7 @@ class HEROGAME_API AGamePlayerController : public APlayerController
 	void ProcessRollInput(const FInputActionValue& Value);
 	void ProcessJumpInput(const FInputActionValue& Value);
 	void ProcessDashInput(const FInputActionValue& Value);
+	void ProcessCameraRotateInput(const FInputActionValue& Value);
 	void ProcessDebugMaterialSwitchInput(const FInputActionValue& Value);
 	
 	UPROPERTY()
@@ -42,7 +43,10 @@ public:
     	
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* DashAction;
-
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* CameraRotateAction;
+	
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* DebugMaterialSwitchAction;
 };
