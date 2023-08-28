@@ -17,3 +17,10 @@ void LogUtil::LogError(FString textToPrint)
 {
 	UE_LOG(LogTemp, Error, TEXT("%s"),*textToPrint);
 }
+
+void LogUtil::Log(FVector vector)
+{
+	auto debugString =  FString::Printf(TEXT("DASH X: %f, Y: %f Z: %f"), vector.X, vector.Y, vector.Z);
+	Log(debugString);
+}
+

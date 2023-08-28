@@ -48,8 +48,12 @@ public:
 	UPROPERTY(EditAnywhere, Category="Balancing")
 	float CameraRotationSpeed;
 	
+	FVector MovementDirection;
+	
 	virtual void Tick(float DeltaTime) override;
 	void Roll(const FVector2d& inputAxis);
+	void Jump();
+	void Dash(const FVector& direction);
 	void RotateCamera(const float axis);
 	void SwitchMaterial(const EBallMaterialType& materialType);
 };

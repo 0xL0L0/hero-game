@@ -26,6 +26,8 @@ void AGamePlayerController::SetupInputComponent()
 	}
 
 	enhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessRollInput);
+	enhancedInput->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessDashInput);
+	enhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessJumpInput);
 	enhancedInput->BindAction(CameraRotateAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessCameraRotateInput);
 	enhancedInput->BindAction(DebugMaterialSwitchAction, ETriggerEvent::Triggered, this, &AGamePlayerController::ProcessDebugMaterialSwitchInput);
 }
@@ -39,10 +41,12 @@ void AGamePlayerController::ProcessRollInput(const FInputActionValue& Value)
 
 void AGamePlayerController::ProcessJumpInput(const FInputActionValue& Value)
 {
+	PossessedPawn->Jump();
 }
 
 void AGamePlayerController::ProcessDashInput(const FInputActionValue& Value)
 {
+	PossessedPawn->Dash(PossessedPawn->MovementDirection);
 }
 
 void AGamePlayerController::ProcessCameraRotateInput(const FInputActionValue& Value)

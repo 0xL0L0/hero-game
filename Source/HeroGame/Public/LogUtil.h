@@ -6,7 +6,8 @@
 
 namespace LogUtil
 {
-	void Log(FString TextToPrint);
-	void LogWarning(FString TextToPrint);
-	void LogError(FString TextToPrint);
+	void Log(FString textToPrint);
+	void LogWarning(FString textToPrint);
+	void LogError(FString textToPrint);
+	void Log(FVector vector);
 }

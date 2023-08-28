@@ -57,10 +57,28 @@ void APlayerBallPawn::Roll(const FVector2d& inputAxis)
 	const auto cameraForwardNorm = FVector(cameraForward.X, cameraForward.Y, 0).GetSafeNormal();
 	const auto cameraRightNorm = FVector(cameraRight.X, cameraRight.Y, 0).GetSafeNormal();
 
-	FVector torque = (cameraForwardNorm * normalizedInput.Y) + (cameraRightNorm * normalizedInput.X);
-	torque.Normalize();
+	MovementDirection = (cameraForwardNorm * normalizedInput.X) + (cameraRightNorm * normalizedInput.Y);
+	MovementDirection.Normalize();
+
+	// Inputs are inverted because torque is applies on an axis of rotation, rather than a direction
+	FVector torqueDirection = (cameraForwardNorm * (normalizedInput.Y * -1)) + (cameraRightNorm * normalizedInput.X);
+	torqueDirection.Normalize();
 	
-	BallComponent->AddTorqueInRadians(torque * 1000000);
+	BallComponent->AddTorqueInDegrees(torqueDirection * CurrentBallMaterial->MovementRollForce * GetWorld()->GetDeltaSeconds() * 100000);
+}
+
+void APlayerBallPawn::Jump()
+{
+	const FVector Impulse = FVector(0.0f, 0.0f, CurrentBallMaterial->MovementJumpForce);
+	BallComponent->AddImpulse(Impulse);
+}
+
+void APlayerBallPawn::Dash(const FVector& direction)
+{
+	auto DashVelocity = direction * CurrentBallMaterial->MovementDashForce;
+	BallComponent->SetPhysicsAngularVelocityInDegrees(FVector(0,0,0));
+	//BallComponent->SetPhysicsLinearVelocity(DashVelocity);
+	BallComponent->AddImpulse(DashVelocity);
 }
 
 void APlayerBallPawn::SwitchMaterial(const EBallMaterialType& materialType)

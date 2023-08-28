@@ -15,11 +15,12 @@ enum class ELevelType : uint8
 UENUM(BlueprintType)
 enum class EBallMaterialType : uint8
 {
-	Paper UMETA(DisplayName = "Paper"),
-	Rubber UMETA(DisplayName = "Rubber"),
-	Wood UMETA(DisplayName = "Wood"),
-	Stone UMETA(DisplayName = "Stone"),
-	Metal UMETA(DisplayName = "Metal"),
-	Glass UMETA(DisplayName = "Glass"),
-	Plastic UMETA(DisplayName = "Plastic")
+	None = 0 UMETA(DisplayName = "None"),
+	Paper = 1 UMETA(DisplayName = "Paper"),
+	Rubber = 2 UMETA(DisplayName = "Rubber"),
+	Wood = 3 UMETA(DisplayName = "Wood"),
+	Stone= 4 UMETA(DisplayName = "Stone"),
+	Metal = 5 UMETA(DisplayName = "Metal"),
+	Glass = 6 UMETA(DisplayName = "Glass"),
+	Plastic = 7 UMETA(DisplayName = "Plastic")
 };
