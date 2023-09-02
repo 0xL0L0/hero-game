@@ -5,6 +5,7 @@
 
 #include "HeroGameInstance.h"
 #include "LogUtil.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -21,6 +22,7 @@ void APlayerBallPawn::BeginPlay()
 	GameInstance = Cast<UHeroGameInstance>(GetGameInstance());
 	GameMode = Cast<AHeroGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	BallComponent = Cast<UStaticMeshComponent>(GetDefaultSubobjectByName("PlayerBall"));
+	BallCollisionComponent = Cast<USphereComponent>(GetDefaultSubobjectByName("PlayerBallCollision"));
 	CameraSpringArmComponent = Cast<USpringArmComponent>(GetDefaultSubobjectByName("CameraSpringArm"));
 	CameraComponent = Cast<UCameraComponent>(GetDefaultSubobjectByName("Camera"));
 	
@@ -35,6 +37,26 @@ void APlayerBallPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CameraFollowBall();
+	CheckUpdateGrounding();
+	LogUtil::Log(FString::Printf(TEXT("%s"), bIsGrounded ? TEXT("true") : TEXT("false")));
+}
+
+void APlayerBallPawn::CheckUpdateGrounding()
+{
+	FVector StartLocation = BallComponent->GetComponentLocation();
+	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, 10);
+	FHitResult HitResult;
+	
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		FQuat::Identity,
+		ECC_GameTraceChannel1,
+		FCollisionShape::MakeSphere(BallCollisionComponent->GetScaledSphereRadius())
+	);
+	
+	bIsGrounded = bHit;
 }
 
 void APlayerBallPawn::CameraFollowBall()
@@ -64,21 +86,27 @@ void APlayerBallPawn::Roll(const FVector2d& inputAxis)
 	FVector torqueDirection = (cameraForwardNorm * (normalizedInput.Y * -1)) + (cameraRightNorm * normalizedInput.X);
 	torqueDirection.Normalize();
 	
-	BallComponent->AddTorqueInDegrees(torqueDirection * CurrentBallMaterial->MovementRollForce * GetWorld()->GetDeltaSeconds() * 100000);
+	BallCollisionComponent->AddTorqueInDegrees(torqueDirection * CurrentBallMaterial->MovementRollForce * GetWorld()->GetDeltaSeconds() * 100000);
+	
+	if(!bIsGrounded)
+	{
+		const FVector Force = FVector(MovementDirection * CurrentBallMaterial->MovementAirControl);
+		BallCollisionComponent->AddForce(Force,"None",false);
+	}
 }
 
 void APlayerBallPawn::Jump()
 {
 	const FVector Impulse = FVector(0.0f, 0.0f, CurrentBallMaterial->MovementJumpForce);
-	BallComponent->AddImpulse(Impulse);
+	BallCollisionComponent->AddImpulse(Impulse);
 }
 
 void APlayerBallPawn::Dash(const FVector& direction)
 {
 	auto DashVelocity = direction * CurrentBallMaterial->MovementDashForce;
-	BallComponent->SetPhysicsAngularVelocityInDegrees(FVector(0,0,0));
+	BallCollisionComponent->SetPhysicsAngularVelocityInDegrees(FVector(0,0,0));
 	//BallComponent->SetPhysicsLinearVelocity(DashVelocity);
-	BallComponent->AddImpulse(DashVelocity);
+	BallCollisionComponent->AddImpulse(DashVelocity);
 }
 
 void APlayerBallPawn::SwitchMaterial(const EBallMaterialType& materialType)
@@ -86,10 +114,10 @@ void APlayerBallPawn::SwitchMaterial(const EBallMaterialType& materialType)
 	CurrentBallMaterial = GameInstance->BallMaterialCollection->GetBallMaterial(materialType);
 	
 	BallComponent->SetMaterial(0,CurrentBallMaterial->BaseMaterial);
-	BallComponent->SetPhysMaterialOverride(CurrentBallMaterial->PhysicalMaterial);
-	BallComponent->SetMassOverrideInKg("None", CurrentBallMaterial->Mass);
-	BallComponent->SetLinearDamping(CurrentBallMaterial->LinearDamping);
-	BallComponent->SetAngularDamping(CurrentBallMaterial->AngularDamping);
-	BallComponent->SetPhysicsMaxAngularVelocityInDegrees(CurrentBallMaterial->MaxAngularVelocity);
+	BallCollisionComponent->SetPhysMaterialOverride(CurrentBallMaterial->PhysicalMaterial);
+	BallCollisionComponent->SetMassOverrideInKg("None", CurrentBallMaterial->Mass);
+	BallCollisionComponent->SetLinearDamping(CurrentBallMaterial->LinearDamping);
+	BallCollisionComponent->SetAngularDamping(CurrentBallMaterial->AngularDamping);
+	BallCollisionComponent->SetPhysicsMaxAngularVelocityInDegrees(CurrentBallMaterial->MaxAngularVelocity);
 }
 

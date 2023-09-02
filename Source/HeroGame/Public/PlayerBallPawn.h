@@ -8,6 +8,7 @@
 #include "HeroGameInstance.h"
 #include "HeroGameMode.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "PlayerBallPawn.generated.h"
@@ -19,6 +20,10 @@ class HEROGAME_API APlayerBallPawn : public APawn
 	// Sets default values for this pawn's properties
 	APlayerBallPawn();
 
+	bool bIsGrounded;
+
+	void CheckUpdateGrounding();
+	
 	UPROPERTY()
 	UHeroGameInstance* GameInstance;
 
@@ -30,6 +35,9 @@ class HEROGAME_API APlayerBallPawn : public APawn
 
 	UPROPERTY()
 	UStaticMeshComponent* BallComponent;
+
+	UPROPERTY()
+	USphereComponent* BallCollisionComponent;
 	
 	UPROPERTY()
 	USpringArmComponent* CameraSpringArmComponent;
