@@ -21,8 +21,11 @@ class HEROGAME_API APlayerBallPawn : public APawn
 	APlayerBallPawn();
 
 	bool bIsGrounded;
+	float JumpCooldown;
 
+	void HandleTimers();
 	void CheckUpdateGrounding();
+	void ClampLinearVelocity() const;
 	
 	UPROPERTY()
 	UHeroGameInstance* GameInstance;

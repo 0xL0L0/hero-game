@@ -30,6 +30,9 @@ void APlayerBallPawn::BeginPlay()
 		SwitchMaterial(EBallMaterialType::Wood);
 
 	//AActor::GetWorld()->GetFirstPlayerController()->Possess(this);
+
+	// TODO - REMOVE MAGIC NUMBERS
+	JumpCooldown = 0.1f;
 }
 
 // Called every frame
@@ -38,13 +41,24 @@ void APlayerBallPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CameraFollowBall();
 	CheckUpdateGrounding();
-	LogUtil::Log(FString::Printf(TEXT("%s"), bIsGrounded ? TEXT("true") : TEXT("false")));
+	ClampLinearVelocity();
+	HandleTimers();
+}
+
+void APlayerBallPawn::HandleTimers()
+{
+	if(JumpCooldown <= 0)
+	{
+		return;
+	}
+	
+	JumpCooldown -= GetWorld()->DeltaTimeSeconds;
 }
 
 void APlayerBallPawn::CheckUpdateGrounding()
 {
 	FVector StartLocation = BallComponent->GetComponentLocation();
-	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, 10);
+	FVector EndLocation = StartLocation - FVector(0.0f, 0.0f, 15);
 	FHitResult HitResult;
 	
 	bool bHit = GetWorld()->SweepSingleByChannel(
@@ -57,6 +71,15 @@ void APlayerBallPawn::CheckUpdateGrounding()
 	);
 	
 	bIsGrounded = bHit;
+}
+
+void APlayerBallPawn::ClampLinearVelocity() const
+{
+	return;
+	
+	const FVector currentVelocity = BallCollisionComponent->GetPhysicsLinearVelocity();
+	const FVector clampedVelocity = currentVelocity.GetClampedToMaxSize(CurrentBallMaterial->MaxLinearVelocity);
+	BallCollisionComponent->SetPhysicsLinearVelocity(clampedVelocity);
 }
 
 void APlayerBallPawn::CameraFollowBall()
@@ -97,15 +120,24 @@ void APlayerBallPawn::Roll(const FVector2d& inputAxis)
 
 void APlayerBallPawn::Jump()
 {
+	if(!bIsGrounded || JumpCooldown > 0)
+	{
+		return;
+	}
+
+	FVector currentLinearVelocity = BallCollisionComponent->GetPhysicsLinearVelocity("None");
 	const FVector Impulse = FVector(0.0f, 0.0f, CurrentBallMaterial->MovementJumpForce);
+	BallCollisionComponent->SetPhysicsLinearVelocity(FVector(currentLinearVelocity.X,currentLinearVelocity.Y,0));
 	BallCollisionComponent->AddImpulse(Impulse);
+
+	JumpCooldown = 0.1f;
 }
 
 void APlayerBallPawn::Dash(const FVector& direction)
 {
 	auto DashVelocity = direction * CurrentBallMaterial->MovementDashForce;
 	BallCollisionComponent->SetPhysicsAngularVelocityInDegrees(FVector(0,0,0));
-	//BallComponent->SetPhysicsLinearVelocity(DashVelocity);
+	BallCollisionComponent->SetPhysicsLinearVelocity(FVector(0,0,0));
 	BallCollisionComponent->AddImpulse(DashVelocity);
 }
 
